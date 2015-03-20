@@ -49,9 +49,7 @@ else {
 		*count++;
 		}
 		else *myFlag = !(*myFlag);
-	}
-			
-
+	}	
 }
 return 0;
 } 
@@ -66,6 +64,33 @@ if (((table[index] == 0) && (myAction == "NT")) || ((table[index] == 1) && (myAc
 }
 }
 
+/// Tournament Predictor
+int tournamentPredictor(bool *table, int bitSize, unsigned long long &myLine, string &myAction, int *count, int T1, int T2) {
+int index = (int) myLine & 0x1 << bitSize;
+if (table[index] == 0) {
+//State PG in State Machine
+	if ((*myFlag == true) && ((T1 == 0) && (T2 != 0)))
+			*myFlag = !(*myFlag);
+//State G in State Machine
+	else if (*myFlag == false) {
+		if ((T1 == 0) && (T2 != 0)) {
+		*count++;
+		
+		}
+	}
+		
+
+}
+if (T1 && T2) {	
+}
+
+//State G in State Machine
+//State B in State Machine
+//State PB in State Machine
+
+return 0;
+}
+
 int main(int argc, char *argv[]) {
 if (argc == 2 && (!strcmp(argv[1], "--help") || !strcmp(argv[1], "-h"))) cout << "Usage: wu_prj1 [INPUT] [OUTPUT]" << endl;
 else if (argc != 3) cout << "Invalid arguments. Use command --help for more information" << endl;
@@ -75,11 +100,13 @@ else {
 ifstream myFile(argv[1]);
 unsigned long long myLine = 0;
 string myAction, line;
-int branches = 0, always_taken_count = 0, not_taken_count = 0, bimodalOne_count[SIZES] = {0}, bimodalTwo_count[SIZES] = {0}, global_count = 0;
-bool *myBooleanTable[SIZES], *myBooleanTable2[SIZES], *myBooleanTable3[SIZES], gShareTable[2048] = {0};
+int branches = 0, always_taken_count = 0, not_taken_count = 0, bimodalOne_count[SIZES] = {0}, bimodalTwo_count[SIZES] = {0}, global_count = 0, tournament_count = 0;
+bool *myBooleanTable[SIZES], *myBooleanTable2[SIZES], *myBooleanTable3[SIZES], gShareTable[2048] = {0}, tournamentTable[2048] = {0};
 register int globalHistory = 0;
 // \brief strong flags
 bool bimodalTwo_flags[SIZES];
+enum States { strongG, weakG, weakB, strongB };
+States tournamentStates[6];
 
 //Initialization
 int array[] = {16, 32, 128, 256, 512, 1024, 2048};
@@ -87,7 +114,9 @@ for (int i = 0; i < SIZES; i++) {
 	myBooleanTable[i] = new bool[array[i]]();
 	myBooleanTable2[i] = new bool[array[i]]();
 	myBooleanTable3[i] = new bool[array[i]]();
+	tournamentStates[i] = States.StrongG;
 	}
+tournamentStates
 fill_n(gShareTable, 2048, 1);
 
 //Main Loop, reading the file
@@ -99,12 +128,14 @@ if (myFile.is_open()) {
 		//Always Taken
 		if (myAction == "T") ++always_taken_count;
 		else if (myAction == "NT") ++not_taken_count;
-		else cerr << "Error reading Taken/Not Taken" << endl;	
+		else cerr << "Error reading Taken/Not Taken" << endl;
+		int T1, T2;	
 		for (int i = 0; i < SIZES; i ++) {
 			bimodalOne(myBooleanTable[i], array[i],  myLine, myAction, &bimodalOne_count[i]);
-			bimodalTwo(myBooleanTable2[i], array[i],  myLine, myAction, &bimodalTwo_flags[i], &bimodalTwo_count[i]);
-			gShare(gShareTable, myLine, myAction, globalHistory, &global_count);
-		}
+			T1 = bimodalTwo(myBooleanTable2[i], array[i],  myLine, myAction, &bimodalTwo_flags[i], &bimodalTwo_count[i]);
+		}	
+		T2 = gShare(gShareTable, myLine, myAction, globalHistory, &global_count);
+		tournamentPredictor(tournamentTable, myLine, myAction, &tournament_count, T1, T2);
 		++branches;
 	}
 	myFile.close();
