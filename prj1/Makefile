@@ -1,5 +1,5 @@
 CFLAGS=-g -Wall -Wextra -Isrc -rdynamic -DNDEBUG
-CC=g++ 
+CC=g++ -w
 
 SOURCES=wu_prj1.cpp
 

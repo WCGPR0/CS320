@@ -2,6 +2,7 @@
 #include <sstream>
 #include <iostream>
 #include <fstream>
+#include <vector>
 using namespace std;
 
 #define SIZES 6
@@ -12,43 +13,43 @@ using namespace std;
 
 /// Bimodal  Predictor with a single bit of history
 /** \param tableSize integer that is the size of the Table */
-int bimodalOne(bool *table, int bitSize, unsigned long long &myLine, string &myAction, int *count) {
+int bimodalOne(vector<bool> &table[SIZES], int bitSize, unsigned long long &myLine, string &myAction, int &count) {
 int index = (int) myLine & 0x1 << bitSize;
 //Compares Table Taken with Action Taken
 if ((table[index] == 0) != (myAction == "T"))
-	*count++;
+	++count;
 return 0;
 } 
 
 /// Bimodal  Predictor with a two bit of history
 /** \param tableSize integer that is the size of the Table */
-int bimodalTwo(bool *table, int bitSize, unsigned long long &myLine, string &myAction, bool *myFlag, int *count) {
+int bimodalTwo(vector<bool> &table[SIZES], int bitSize, unsigned long long &myLine, string &myAction, bool &myFlag, int &count) {
 int index = (int) myLine & 0x1 << bitSize;
 //Compares Table Taken with Action Taken
 if (table[index] == 0) {
 	//State TT in State Machine
-	if ((*myFlag == true) && (myAction == "NT"))	
-		*myFlag = false;
+	if ((myFlag == true) && (myAction == "NT"))	
+		myFlag = false;
 	//State T in State Machine
-	else if (*myFlag == false) {
+	else if (myFlag == false) {
 		if (myAction == "NT") {
 		table[index] = 1;
-		*count++;
+		++count;	
 		}
-		else *myFlag = !(*myFlag);
+		else myFlag = !(myFlag);
 	}
 }
 else {
 	//State NN in State Machine
-	if ((*myFlag == true) && (myAction == "T"))
-		*myFlag = false;
+	if ((myFlag == true) && (myAction == "T"))
+		myFlag = false;
 	//State N in State Machine
-	else if (*myFlag == false) {
+	else if (myFlag == false) {
 		if (myAction == "T") {
 		table[index] = 0;
-		*count++;
+		++count;
 		}
-		else *myFlag = !(*myFlag);
+		else myFlag = !(myFlag);
 	}	
 }
 return 0;
@@ -102,7 +103,9 @@ ifstream myFile(argv[1]);
 unsigned long long myLine = 0;
 string myAction, line;
 int branches = 0, always_taken_count = 0, not_taken_count = 0, bimodalOne_count[SIZES] = {0}, bimodalTwo_count[SIZES] = {0}, global_count = 0, tournament_count = 0;
-bool *myBooleanTable[SIZES], *myBooleanTable2[SIZES], *myBooleanTable3[SIZES], gShareTable[2048] = {0}, tournamentTable[2048] = {0};
+//bool *myBooleanTable[SIZES], *myBooleanTable2[SIZES], *myBooleanTable3[SIZES], gShareTable[2048] = {0}, tournamentTable[2048] = {0};
+vector<bool> bimodalOneTable[SIZES], bimodalTwoTable[SIZES];
+
 register int globalHistory = 0;
 bool gFlag = 0, tournamentFlag = 0;
 // \brief strong flags
@@ -113,11 +116,9 @@ States tournamentStates[6];
 //Initialization
 int array[] = {16, 32, 128, 256, 512, 1024, 2048};
 for (int i = 0; i < SIZES; i++) {
-	myBooleanTable[i] = new bool[array[i]]();
-	myBooleanTable2[i] = new bool[array[i]]();
-	myBooleanTable3[i] = new bool[array[i]]();
-	tournamentStates[i] = strongG;
-	}
+bimodalOneTable[i].assign(array[i], 1);
+bimodalTwoTable[i].assign(array[i], 1);
+}
 
 fill_n(gShareTable, 2048, 1);
 
@@ -132,14 +133,23 @@ if (myFile.is_open()) {
 		else cerr << "Error reading Taken/Not Taken" << endl;
 		int T1, T2;	
 		for (int i = 0; i < SIZES; i ++) {
-			bimodalOne(myBooleanTable[i], array[i],  myLine, myAction, &bimodalOne_count[i]);
-			bimodalTwo(myBooleanTable2[i], array[i],  myLine, myAction, &bimodalTwo_flags[i], &bimodalTwo_count[i]);
+			bimodalOne(bimodalOneTable, array[i],  myLine, myAction, bimodalOne_count[i]);
+			bimodalTwo(bimodalTwoTable, array[i],  myLine, myAction, bimodalTwo_flags[i], bimodalTwo_count[i]);
 		}	
 		//T2 = gShare(gShareTable, myLine, myAction, globalHistory, &global_count);
 		//tournamentPredictor(tournamentTable, myLine, myAction, &tournament_count, T1, T2);
 		++branches;
 	}
-cout << always_taken_count << "," << branches << ";" << endl;
+
+//Output
+cout << always_taken_count << ',' << branches << ';' << endl;
+cout << not_taken_count << ',' << branches << ';' << endl;
+for (int i = 0; i < SIZES; i++)
+	cout << bimodalOne_count[i] << ',' << branches << ';';
+	cout << endl;
+for (int i = 0; i < SIZES; i++)
+	cout << bimodalTwo_count[i] << ',' << branches << ';';
+	cout << endl;
 	myFile.close();
 	
 }
