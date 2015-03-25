@@ -13,7 +13,7 @@ using namespace std;
 
 /// Bimodal  Predictor with a single bit of history
 /** \param tableSize integer that is the size of the Table */
-int bimodalOne(vector<bool> &table[SIZES], int bitSize, unsigned long long &myLine, string &myAction, int &count) {
+int bimodalOne(vector<bool> &table, int bitSize, unsigned long long &myLine, string &myAction, int &count) {
 int index = (int) myLine & 0x1 << bitSize;
 //Compares Table Taken with Action Taken
 if ((table[index] == 0) != (myAction == "T"))
@@ -23,48 +23,69 @@ return 0;
 
 /// Bimodal  Predictor with a two bit of history
 /** \param tableSize integer that is the size of the Table */
-int bimodalTwo(vector<bool> &table[SIZES], int bitSize, unsigned long long &myLine, string &myAction, bool &myFlag, int &count) {
+int bimodalTwo(vector<bool> &table, int bitSize, unsigned long long &myLine, string &myAction, bool &myFlag, int &count) {
 int index = (int) myLine & 0x1 << bitSize;
 //Compares Table Taken with Action Taken
-if (table[index] == 0) {
-	//State TT in State Machine
-	if ((myFlag == true) && (myAction == "NT"))	
-		myFlag = false;
-	//State T in State Machine
-	else if (myFlag == false) {
-		if (myAction == "NT") {
-		table[index] = 1;
-		++count;	
-		}
-		else myFlag = !(myFlag);
+if (table[index] == 1) {	
+	if (myAction == "NT") { //Transition from State TT to T in State Machine
+      if (myFlag)
+		   myFlag = false;
+      else { //Transition from State T to N in State Machine
+         table[index] = 0;
+         ++count;
+      }	
 	}
+   else if (!myFlag) myFlag = !myFlag; //Transition from State T to TT
 }
 else {
-	//State NN in State Machine
-	if ((myFlag == true) && (myAction == "T"))
-		myFlag = false;
-	//State N in State Machine
-	else if (myFlag == false) {
-		if (myAction == "T") {
-		table[index] = 0;
-		++count;
-		}
-		else myFlag = !(myFlag);
+	if (myAction == "T") { //Transition from State NN to N in State Machine
+      if (myFlag)
+		   myFlag = false;
+      else { //Transition from State N to T in State Machine
+         table[index] = 1;
+         ++count;
+      }
+   }	
+	else if (!myFlag) myFlag = !myFlag; //Transition from State N to NN
 	}	
 }
 return 0;
 } 
 
-/*
-/// GShare Predictor
-int gShare(bool *table, unsigned long long &myLine, string &myAction, int &globalHistory, int *count) {
-int index = (int) globalHistory ^ myLine;
-if (((table[index] == 0) && (myAction == "NT")) || ((table[index] == 1) && (myAction == "T"))) {
-	table[index] = !table[index];
-	*count++;
-}
-}
 
+/// GShare Predictor
+int gShare(vector<bool> &table, unsigned long long &myLine, string &myAction, int &globalHistory, bool &myFlag, int &count) {
+int index = (int) globalHistory ^ myLine;
+if (table[index] == 1) {
+   if (myAction == "NT") { //Transition from State TT to T in State Machine
+      if (myFlag)
+         myFlag = false;
+      else { //Transition from State T to N in State Machine
+         table[index] = 0;
+         ++count;
+      }
+   }
+   else if (!myFlag) myFlag = !myFlag;
+}
+else {
+     if (myAction == "T") { //Transition from State NN to N in State Machine
+      if (myFlag)
+         myFlag = false;
+      else { //Transition from State N to T in State Machine
+         table[index] = 1;
+         ++count;
+      }
+   }
+      else if (!myFlag) myFlag = !myFlag; //Transition from State T to TT
+   }
+   //State 
+&& (myAction == "NT")) || ((table[index] == 1) && (myAction == "T"))) {
+	table[index] = !table[index];
+	++count;
+}
+return index;
+}
+/*
 /// Tournament Predictor
 int tournamentPredictor(bool *table, int bitSize, unsigned long long &myLine, string &myAction, bool *myFlag, int *count, int T1, int T2) {
 int index = (int) myLine & 0x1 << bitSize;
@@ -103,8 +124,7 @@ ifstream myFile(argv[1]);
 unsigned long long myLine = 0;
 string myAction, line;
 int branches = 0, always_taken_count = 0, not_taken_count = 0, bimodalOne_count[SIZES] = {0}, bimodalTwo_count[SIZES] = {0}, global_count = 0, tournament_count = 0;
-//bool *myBooleanTable[SIZES], *myBooleanTable2[SIZES], *myBooleanTable3[SIZES], gShareTable[2048] = {0}, tournamentTable[2048] = {0};
-vector<bool> bimodalOneTable[SIZES], bimodalTwoTable[SIZES];
+vector<bool> bimodalOneTable[SIZES], bimodalTwoTable[SIZES], gShareTable;
 
 register int globalHistory = 0;
 bool gFlag = 0, tournamentFlag = 0;
@@ -120,7 +140,7 @@ bimodalOneTable[i].assign(array[i], 1);
 bimodalTwoTable[i].assign(array[i], 1);
 }
 
-fill_n(gShareTable, 2048, 1);
+gShareTable.assign(array[SIZES], 1);
 
 //Main Loop, reading the file
 if (myFile.is_open()) {
@@ -132,11 +152,11 @@ if (myFile.is_open()) {
 		else if (myAction == "NT") ++not_taken_count;
 		else cerr << "Error reading Taken/Not Taken" << endl;
 		int T1, T2;	
-		for (int i = 0; i < SIZES; i ++) {
-			bimodalOne(bimodalOneTable, array[i],  myLine, myAction, bimodalOne_count[i]);
-			bimodalTwo(bimodalTwoTable, array[i],  myLine, myAction, bimodalTwo_flags[i], bimodalTwo_count[i]);
-		}	
-		//T2 = gShare(gShareTable, myLine, myAction, globalHistory, &global_count);
+	/*	for (int i = 0; i < SIZES; i ++) {
+			bimodalOne(bimodalOneTable[i], array[i],  myLine, myAction, bimodalOne_count[i]);
+			bimodalTwo(bimodalTwoTable[i], array[i],  myLine, myAction, bimodalTwo_flags[i], bimodalTwo_count[i]);
+		}	*/
+		T2 = gShare(gShareTable, myLine, myAction, globalHistory, gFlag, global_count);
 		//tournamentPredictor(tournamentTable, myLine, myAction, &tournament_count, T1, T2);
 		++branches;
 	}
@@ -160,8 +180,8 @@ return -1;
 
 
 //CleanUp
-for (int i = 0; i < SIZES; i++)
-	delete myBooleanTable[i];
+//for (int i = 0; i < SIZES; i++)
+//	delete myBooleanTable[i];
 //delete myBooleanTable;
 
 return 0;
