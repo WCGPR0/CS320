@@ -1,3 +1,7 @@
+/** Victor Wu
+    CS320 Project 1
+**/
+
 #include <string.h>
 #include <sstream>
 #include <iostream>
@@ -7,7 +11,8 @@
 #include <math.h>
 using namespace std;
 
-#define SIZES 6
+#define SIZES 7
+#define gSIZES 9
 
 //template <typename T,unsigned S>
 //inline unsigned arraysize(const T (&v)[S]) { return S; }
@@ -63,42 +68,35 @@ return (int) table[index].to_ulong();
 /** \param tableSize integer that is the size of the Table */
 int bimodalTwo(vector<bitset<2> > &table, int bitShift, unsigned long long &myLine, string &myAction, int &count) {
 int index = (int) (0x1 << bitShift) - 1 & myLine;
-bool action = (myAction == "T") ? true : false;
 unsigned long value = table[index].to_ulong();
-if (!action) {
-if (value > 0) {
-	if (value == 1) ++count; //Transition from State T to N 
-	table[index] = increment(table[index]);	
-	}
+if (myAction == "T") {
+if (table[index] == B) ++count; //Transition from NN to T
+if (table[index] != BB) table[index] = increment(table[index]);
 }
-else if (value < 4) {
-	if (value == 2) ++count; //Transition from State N to T
-	table[index] = decrement(table[index]);
-	}
+else {
+if (table[index] == G) ++count; //Transition from T to NN
+if (table[index] != GG) table[index] = decrement(table[index]);
+}
 
 return (int) table[index].to_ulong();
 } 
 
 
 /// GShare Predictor
-int gShare(vector<bitset<2> > &table, int bitSize, unsigned long long &myLine, string &myAction, unsigned long &globalHistory, int &historySize,  int &count) {
-unsigned int index = (unsigned int) globalHistory << (bitSize - historySize++) ^ (myLine & ((1 << bitSize) - 1));
-unsigned long value = table[index].to_ulong();
-bool action = (myAction == "T") ? 1 : 0;
-if (!action) {
-if (value > 0) {
-	if (value == 1) ++count; //Transition from State T to N 
-	table[index] = increment(table[index]);	
-	}
+int gShare(vector<bitset<2> > &table, int bitSize, unsigned long long &myLine, string &myAction, unsigned long &globalHistory, int historySize,  int &count) {
+//unsigned int index = (unsigned int) globalHistory << (bitSize - historySize++) ^ (myLine & bitSize);
+unsigned int index = (unsigned int) globalHistory ^ myLine & bitSize;
+if (myAction == "T") {
+if (table[index] == B) ++count; //Transition from NN to T
+if (table[index] != BB) table[index] = increment(table[index]);
 }
-else if (value < 3) {
-	if (value == 2) ++count; //Transition from State N to T
-	table[index] = decrement(table[index]);
-	}
+else {
+if (table[index] == G) ++count; //Transition from T to NN
+if (table[index] != GG) table[index] = decrement(table[index]);
+}
 
 globalHistory <<= 1;
-globalHistory |= table[index].to_ulong();
-globalHistory &= (1 << historySize)-1; 
+globalHistory = (unsigned long) table[index].to_ulong();
 
 return (int) globalHistory;
 }
@@ -130,9 +128,9 @@ else {
 ifstream myFile(argv[1]);
 unsigned long long myLine = 0;
 string myAction, line;
-int branches = 0, always_taken_count = 0, not_taken_count = 0, bimodalOne_count[SIZES] = {0}, bimodalTwo_count[SIZES] = {0}, global_count = 0, tournament_count = 0, historyCount = 3;
+int branches = 0, always_taken_count = 0, not_taken_count = 0, bimodalOne_count[SIZES] = {0}, bimodalTwo_count[SIZES] = {0}, global_count[gSIZES - SIZES + 1] = {0}, tournament_count = 0;
 
-register unsigned long globalHistory = 0;
+register unsigned long globalHistory[SIZES] = {0};
 bool gFlag = 0, tournamentFlag = 0;
 // \brief strong flags
 bool bimodalTwo_flags[SIZES];
@@ -140,16 +138,17 @@ bitset<2> myTwoState(GG);
 bitset<1> myOneState(T);
 
 vector<bitset<1> > bimodalOneTable[SIZES];
-vector<bitset<2> > bimodalTwoTable[SIZES], gShareTable;
+vector<bitset<2> > bimodalTwoTable[SIZES], gShareTable[SIZES];
 
 //Initialization
 int array[] = {16, 32, 128, 256, 512, 1024, 2048};
 for (int i = 0; i < SIZES; i++) {
 bimodalOneTable[i].assign(array[i], myOneState);
 bimodalTwoTable[i].assign(array[i], myTwoState);
+gShareTable[i].assign(array[i+(gSIZES - SIZES + 1)], myTwoState);
 }
 
-gShareTable.assign(array[SIZES], myTwoState);
+
 
 //Main Loop, reading the file
 if (myFile.is_open()) {
@@ -165,8 +164,10 @@ if (myFile.is_open()) {
 		int arraySizes[] = {4, 5, 7, 8, 9, 10, 11};
 			bimodalOne(bimodalOneTable[i], arraySizes[i],  myLine, myAction, bimodalOne_count[i]);
 			bimodalTwo(bimodalTwoTable[i], arraySizes[i],  myLine, myAction, bimodalTwo_count[i]);
-		}	
-		//T2 = gShare(gShareTable,array[SIZES], myLine, myAction, globalHistory, historyCount, global_count);
+			T2 = gShare(gShareTable[i], array[SIZES], myLine, myAction, globalHistory[i], i+(gSIZES - SIZES + 1), global_count[i]);
+		}
+		for (int i = SIZES; i < gSIZES; i++)
+			T2 = gShare (gShareTable[i], array[SIZES], myLine, myAction, globalHistory[i], i+(gSIZES - SIZES + 1), global_count[i]);
 		//tournamentPredictor(tournamentTable, myLine, myAction, &tournament_count, T1, T2);
 		++branches;
 	}
@@ -179,21 +180,17 @@ for (int i = 0; i < SIZES; i++)
 	cout << endl;
 for (int i = 0; i < SIZES; i++)
 	cout << bimodalTwo_count[i] << ',' << branches << ';';
+	cout <<endl;
+for (int i = 0; i < gSIZES - SIZES + 1; i++)
+	cout << global_count[i] << ',' << branches << ';';
 	cout << endl;
 	myFile.close();
-
-//cout << global_count << ',' << branches << ';' << endl; 
 }
 else {
 cerr << "Unable to open input file" << endl;
 return -1;
 }
 
-
-//CleanUp
-//for (int i = 0; i < SIZES; i++)
-//	delete myBooleanTable[i];
-//delete myBooleanTable;
 
 return 0;
 }
