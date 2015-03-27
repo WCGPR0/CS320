@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['tournamentpredictor',['tournamentPredictor',['../wu__prj1_8cpp.html#a96d85a1ade87d8554761164a5ed40e02',1,'wu_prj1.cpp']]]
+  ['sizes',['SIZES',['../wu__prj1_8cpp.html#a5cfb63292b299f63d336d7bed86cd526',1,'wu_prj1.cpp']]]
 ];
