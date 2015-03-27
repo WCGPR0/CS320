@@ -89,26 +89,29 @@ bool bimodalTwo(vector<bitset<2> > &table, int bitShift, unsigned long long &myL
 
 /// GShare Predictor
 bool gShare(vector<bitset<2> > &table, int bitShift, unsigned long long &myLine, string &myAction, unsigned long &globalHistory, int historySize,  int &count) {
-	int index = (int) globalHistory << (bitShift - historySize) ^ (myLine & (0x1 << bitShift) - 1);
-	//int index = (int) globalHistory ^ myLine & (0x1 << bitShift) - 1;
+	//int index = globalHistory << (bitShift - historySize) ^ ((0x1 << bitShift) - 1 & myLine);
+	int index = (int) (globalHistory ^ myLine) & (0x1 << bitShift) - 1;
 	bool flag = false;
 	if (myAction == "T") {
-		if (table[index] != GG) table[index] = decrement(table[index]);
+		if (table[index] != GG) 
+			table[index] = decrement(table[index]);
 		if (table[index] == GG) {
 			++count;
-			flag = true;
-		}
+			flag = true;			
+		}	
 	}
 	else {
-		if (table[index] != BB) table[index] = increment(table[index]);
+		if (table[index] != BB)
+			table[index] = increment(table[index]);
 		if (table[index] == BB) {
 			++count;
 			flag = true;
-		}
+		}	
 	}
 
 	globalHistory <<= 1;
-	globalHistory |= table[index].to_ulong();
+	if (myAction == "T")
+	globalHistory |= 1;
 	globalHistory &= (0x1 << historySize)-1;
 	return flag; 
 }
@@ -118,11 +121,11 @@ bool gShare(vector<bitset<2> > &table, int bitShift, unsigned long long &myLine,
 int tournamentPredictor(vector<bitset<2> > &table, int bitShift, unsigned long long &myLine, string &myAction, int &count, bool T1, bool T2) {
 	int index = (int) (0x1 << bitShift) - 1 & myLine;
 	if (T1 != T2) {
-		if (T1) {
+		if (T1) { //gShare is Taken
 			if (table[index] != GG) table[index] = decrement(table[index]);
 			if (table[index] == GG) ++count;
 		}
-		else {
+		else { //bimodal is Taken
 			if (table[index] != BB) table[index] = increment(table[index]);
 			if (table[index] == BB) ++count;
 		}
