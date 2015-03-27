@@ -89,8 +89,8 @@ bool bimodalTwo(vector<bitset<2> > &table, int bitShift, unsigned long long &myL
 
 /// GShare Predictor
 bool gShare(vector<bitset<2> > &table, int bitShift, unsigned long long &myLine, string &myAction, unsigned long &globalHistory, int historySize,  int &count) {
-	//unsigned int index = (unsigned int) globalHistory << (bitSize - historySize++) ^ (myLine & bitSize);
-	int index = (int) globalHistory ^ myLine & (0x1 << bitShift) - 1;
+	int index = (int) globalHistory << (bitShift - historySize) ^ (myLine & (0x1 << bitShift) - 1);
+	//int index = (int) globalHistory ^ myLine & (0x1 << bitShift) - 1;
 	bool flag = false;
 	if (myAction == "T") {
 		if (table[index] != GG) table[index] = decrement(table[index]);
@@ -109,6 +109,7 @@ bool gShare(vector<bitset<2> > &table, int bitShift, unsigned long long &myLine,
 
 	globalHistory <<= 1;
 	globalHistory |= table[index].to_ulong();
+	globalHistory &= (0x1 << historySize)-1;
 	return flag; 
 }
 
