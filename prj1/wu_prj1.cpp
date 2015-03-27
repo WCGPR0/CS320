@@ -108,7 +108,7 @@ bool gShare(vector<bitset<2> > &table, int bitShift, unsigned long long &myLine,
 	}
 
 	globalHistory <<= 1;
-	globalHistory = (unsigned long) table[index].to_ulong();
+	globalHistory |= table[index].to_ulong();
 	return flag; 
 }
 
