@@ -90,7 +90,7 @@ bool bimodalTwo(vector<bitset<2> > &table, int bitShift, unsigned long long &myL
 /// GShare Predictor
 bool gShare(vector<bitset<2> > &table, int bitShift, unsigned long long &myLine, string &myAction, unsigned long &globalHistory, int historySize,  int &count) {
 	//unsigned int index = (unsigned int) globalHistory << (bitSize - historySize++) ^ (myLine & bitSize);
-	unsigned int index = (unsigned int) globalHistory ^ myLine & (0x1 << bitShift) - 1;
+	int index = (int) globalHistory ^ myLine & (0x1 << bitShift) - 1;
 	bool flag = false;
 	if (myAction == "T") {
 		if (table[index] != GG) table[index] = decrement(table[index]);
@@ -159,7 +159,7 @@ int main(int argc, char *argv[]) {
 			gShareTable[i].assign(array[SIZES-1], myTwoState);
 		}
 		for (int i = SIZES; i < gSIZES; i++) gShareTable[i].assign(array[SIZES-1], myTwoState);
-
+		tournamentTable.assign(array[SIZES-1], myTwoState);
 
 		//Main Loop, reading the file
 		if (myFile.is_open()) {
