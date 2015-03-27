@@ -4,6 +4,11 @@ Command Line Arguments
 
 Example: ./predictors input.txt output.txt
 
+------------------------
+Documentation
+------------------------
+
+Used Doxygen syntax for documenting the code, making it easier to create a presentable document for easy understanding of code blocks.
 
 -------------------------
 Design Decisions & Issues

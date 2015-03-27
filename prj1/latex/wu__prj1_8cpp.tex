@@ -1,0 +1,237 @@
+\hypertarget{wu__prj1_8cpp}{}\section{wu\+\_\+prj1.\+cpp File Reference}
+\label{wu__prj1_8cpp}\index{wu\+\_\+prj1.\+cpp@{wu\+\_\+prj1.\+cpp}}
+
+
+C\+S320 Project 1
+
+Implementation of branch prediction methods including g\+Share, bimodal, and tournament predictors.  
+
+
+{\ttfamily \#include $<$string.\+h$>$}\\*
+{\ttfamily \#include $<$sstream$>$}\\*
+{\ttfamily \#include $<$iostream$>$}\\*
+{\ttfamily \#include $<$fstream$>$}\\*
+{\ttfamily \#include $<$vector$>$}\\*
+{\ttfamily \#include $<$bitset$>$}\\*
+{\ttfamily \#include $<$math.\+h$>$}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{wu__prj1_8cpp_a5cfb63292b299f63d336d7bed86cd526}{S\+I\+Z\+E\+S}~7
+\item 
+\#define \hyperlink{wu__prj1_8cpp_ad98432e2d6ac07a336857a1a901454a2}{g\+S\+I\+Z\+E\+S}~9
+\end{DoxyCompactItemize}
+\subsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{wu__prj1_8cpp_ab2cf6eb6535936015e0129a22e29572b}{}enum {\bfseries prefer\+States} \{ {\bfseries G\+G}, 
+{\bfseries G}, 
+{\bfseries B}, 
+{\bfseries B\+B}
+ \}\label{wu__prj1_8cpp_ab2cf6eb6535936015e0129a22e29572b}
+
+\item 
+\hypertarget{wu__prj1_8cpp_af69fcf9305bdd3f0e803ea284f21e9e5}{}enum {\bfseries bi\+States} \{ {\bfseries N\+T}, 
+{\bfseries T}
+ \}\label{wu__prj1_8cpp_af69fcf9305bdd3f0e803ea284f21e9e5}
+
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+{\footnotesize template$<$size\+\_\+t N$>$ }\\std\+::bitset$<$ N $>$ \hyperlink{wu__prj1_8cpp_a6df6ef9088481d438c9b7be4939301ff}{increment} (std\+::bitset$<$ N $>$ bit)
+\item 
+{\footnotesize template$<$size\+\_\+t N$>$ }\\std\+::bitset$<$ N $>$ \hyperlink{wu__prj1_8cpp_a5aa36f6a3c9df3474a4e111248581db8}{decrement} (std\+::bitset$<$ N $>$ bit)
+\item 
+int \hyperlink{wu__prj1_8cpp_a31d78be1944e07aba4b0908c8eb8ad8e}{bimodal\+One} (vector$<$ bitset$<$ 1 $>$ $>$ \&table, int bit\+Shift, unsigned long long \&my\+Line, string \&my\+Action, int \&count)
+\item 
+bool \hyperlink{wu__prj1_8cpp_a29abe43a736db1c1ccbbb1da839f93ad}{bimodal\+Two} (vector$<$ bitset$<$ 2 $>$ $>$ \&table, int bit\+Shift, unsigned long long \&my\+Line, string \&my\+Action, int \&count)
+\item 
+bool \hyperlink{wu__prj1_8cpp_adc33a5b5ad702f8d258a52f77ea7053e}{g\+Share} (vector$<$ bitset$<$ 2 $>$ $>$ \&table, int bit\+Shift, unsigned long long \&my\+Line, string \&my\+Action, unsigned long \&global\+History, int history\+Size, int \&count)
+\item 
+int \hyperlink{wu__prj1_8cpp_a96d85a1ade87d8554761164a5ed40e02}{tournament\+Predictor} (vector$<$ bitset$<$ 2 $>$ $>$ \&table, int bit\+Shift, unsigned long long \&my\+Line, string \&my\+Action, int \&count, bool T1, bool T2)
+\item 
+int \hyperlink{wu__prj1_8cpp_a0ddf1224851353fc92bfbff6f499fa97}{main} (int argc, char $\ast$argv\mbox{[}$\,$\mbox{]})
+\begin{DoxyCompactList}\small\item\em Main function for executable. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+C\+S320 Project 1
+
+Implementation of branch prediction methods including g\+Share, bimodal, and tournament predictors. 
+
+\begin{DoxyAuthor}{Author}
+Victor Wu 
+\end{DoxyAuthor}
+
+
+\subsection{Macro Definition Documentation}
+\hypertarget{wu__prj1_8cpp_ad98432e2d6ac07a336857a1a901454a2}{}\index{wu\+\_\+prj1.\+cpp@{wu\+\_\+prj1.\+cpp}!g\+S\+I\+Z\+E\+S@{g\+S\+I\+Z\+E\+S}}
+\index{g\+S\+I\+Z\+E\+S@{g\+S\+I\+Z\+E\+S}!wu\+\_\+prj1.\+cpp@{wu\+\_\+prj1.\+cpp}}
+\subsubsection[{g\+S\+I\+Z\+E\+S}]{\setlength{\rightskip}{0pt plus 5cm}\#define g\+S\+I\+Z\+E\+S~9}\label{wu__prj1_8cpp_ad98432e2d6ac07a336857a1a901454a2}
+Count of varying historysizes for g\+Share \hypertarget{wu__prj1_8cpp_a5cfb63292b299f63d336d7bed86cd526}{}\index{wu\+\_\+prj1.\+cpp@{wu\+\_\+prj1.\+cpp}!S\+I\+Z\+E\+S@{S\+I\+Z\+E\+S}}
+\index{S\+I\+Z\+E\+S@{S\+I\+Z\+E\+S}!wu\+\_\+prj1.\+cpp@{wu\+\_\+prj1.\+cpp}}
+\subsubsection[{S\+I\+Z\+E\+S}]{\setlength{\rightskip}{0pt plus 5cm}\#define S\+I\+Z\+E\+S~7}\label{wu__prj1_8cpp_a5cfb63292b299f63d336d7bed86cd526}
+Count of varying tablesizes for bimodal\+One and bimodal\+Two 
+
+\subsection{Function Documentation}
+\hypertarget{wu__prj1_8cpp_a31d78be1944e07aba4b0908c8eb8ad8e}{}\index{wu\+\_\+prj1.\+cpp@{wu\+\_\+prj1.\+cpp}!bimodal\+One@{bimodal\+One}}
+\index{bimodal\+One@{bimodal\+One}!wu\+\_\+prj1.\+cpp@{wu\+\_\+prj1.\+cpp}}
+\subsubsection[{bimodal\+One}]{\setlength{\rightskip}{0pt plus 5cm}int bimodal\+One (
+\begin{DoxyParamCaption}
+\item[{vector$<$ bitset$<$ 1 $>$ $>$ \&}]{table, }
+\item[{int}]{bit\+Shift, }
+\item[{unsigned long long \&}]{my\+Line, }
+\item[{string \&}]{my\+Action, }
+\item[{int \&}]{count}
+\end{DoxyParamCaption}
+)}\label{wu__prj1_8cpp_a31d78be1944e07aba4b0908c8eb8ad8e}
+Bimodal Predictor with a single bit of history 
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in,out}  & {\em a} & vector table of bitsize of 1, storing the one bit states \\
+\hline
+\mbox{\tt in}  & {\em the} & table size represented by bit shifts, 2$^\wedge$bit\+Shift = table\+Size \\
+\hline
+\mbox{\tt in}  & {\em input} & address taken in, representing P\+C \\
+\hline
+\mbox{\tt in}  & {\em input} & action taken in, being either Taken or Not Taken \\
+\hline
+\mbox{\tt in,out}  & {\em current} & correct prediction counter \\
+\hline
+\end{DoxyParams}
+\hypertarget{wu__prj1_8cpp_a29abe43a736db1c1ccbbb1da839f93ad}{}\index{wu\+\_\+prj1.\+cpp@{wu\+\_\+prj1.\+cpp}!bimodal\+Two@{bimodal\+Two}}
+\index{bimodal\+Two@{bimodal\+Two}!wu\+\_\+prj1.\+cpp@{wu\+\_\+prj1.\+cpp}}
+\subsubsection[{bimodal\+Two}]{\setlength{\rightskip}{0pt plus 5cm}bool bimodal\+Two (
+\begin{DoxyParamCaption}
+\item[{vector$<$ bitset$<$ 2 $>$ $>$ \&}]{table, }
+\item[{int}]{bit\+Shift, }
+\item[{unsigned long long \&}]{my\+Line, }
+\item[{string \&}]{my\+Action, }
+\item[{int \&}]{count}
+\end{DoxyParamCaption}
+)}\label{wu__prj1_8cpp_a29abe43a736db1c1ccbbb1da839f93ad}
+Bimodal Predictor with a two bit of history 
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in,out}  & {\em a} & vector table of bitsize of 2, storing the two bit states \\
+\hline
+\mbox{\tt in}  & {\em the} & table size represented by bit shifts, 2$^\wedge$bit\+Shift = table\+Size \\
+\hline
+\mbox{\tt in}  & {\em input} & address taken in, representing P\+C \\
+\hline
+\mbox{\tt in}  & {\em input} & action taken in, being either Taken or Not Taken \\
+\hline
+\mbox{\tt in,out}  & {\em current} & correct prediction counter \\
+\hline
+\end{DoxyParams}
+\hypertarget{wu__prj1_8cpp_a5aa36f6a3c9df3474a4e111248581db8}{}\index{wu\+\_\+prj1.\+cpp@{wu\+\_\+prj1.\+cpp}!decrement@{decrement}}
+\index{decrement@{decrement}!wu\+\_\+prj1.\+cpp@{wu\+\_\+prj1.\+cpp}}
+\subsubsection[{decrement}]{\setlength{\rightskip}{0pt plus 5cm}template$<$size\+\_\+t N$>$ std\+::bitset$<$N$>$ decrement (
+\begin{DoxyParamCaption}
+\item[{std\+::bitset$<$ N $>$}]{bit}
+\end{DoxyParamCaption}
+)}\label{wu__prj1_8cpp_a5aa36f6a3c9df3474a4e111248581db8}
+Helper function for decrementing bitsets 
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em bit} & a S\+T\+L bitsize to be decremented \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a resulting S\+T\+L bitsize decremented 
+\end{DoxyReturn}
+\hypertarget{wu__prj1_8cpp_adc33a5b5ad702f8d258a52f77ea7053e}{}\index{wu\+\_\+prj1.\+cpp@{wu\+\_\+prj1.\+cpp}!g\+Share@{g\+Share}}
+\index{g\+Share@{g\+Share}!wu\+\_\+prj1.\+cpp@{wu\+\_\+prj1.\+cpp}}
+\subsubsection[{g\+Share}]{\setlength{\rightskip}{0pt plus 5cm}bool g\+Share (
+\begin{DoxyParamCaption}
+\item[{vector$<$ bitset$<$ 2 $>$ $>$ \&}]{table, }
+\item[{int}]{bit\+Shift, }
+\item[{unsigned long long \&}]{my\+Line, }
+\item[{string \&}]{my\+Action, }
+\item[{unsigned long \&}]{global\+History, }
+\item[{int}]{history\+Size, }
+\item[{int \&}]{count}
+\end{DoxyParamCaption}
+)}\label{wu__prj1_8cpp_adc33a5b5ad702f8d258a52f77ea7053e}
+G\+Share Predictor using a global history counter 
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in,out}  & {\em a} & vector table of bitsize of 2, storing the two bit states \\
+\hline
+\mbox{\tt in}  & {\em the} & table size represented by bit shifts, 2$^\wedge$bit\+Shift = table\+Size \\
+\hline
+\mbox{\tt in}  & {\em input} & address taken in, representing P\+C \\
+\hline
+\mbox{\tt in}  & {\em input} & action taken in, being either Taken or Not Taken \\
+\hline
+\mbox{\tt in,out}  & {\em current} & global history counter \\
+\hline
+\mbox{\tt in}  & {\em input} & history size for global register counter \\
+\hline
+\mbox{\tt in,out}  & {\em current} & correct prediction counter \\
+\hline
+\end{DoxyParams}
+\hypertarget{wu__prj1_8cpp_a6df6ef9088481d438c9b7be4939301ff}{}\index{wu\+\_\+prj1.\+cpp@{wu\+\_\+prj1.\+cpp}!increment@{increment}}
+\index{increment@{increment}!wu\+\_\+prj1.\+cpp@{wu\+\_\+prj1.\+cpp}}
+\subsubsection[{increment}]{\setlength{\rightskip}{0pt plus 5cm}template$<$size\+\_\+t N$>$ std\+::bitset$<$N$>$ increment (
+\begin{DoxyParamCaption}
+\item[{std\+::bitset$<$ N $>$}]{bit}
+\end{DoxyParamCaption}
+)}\label{wu__prj1_8cpp_a6df6ef9088481d438c9b7be4939301ff}
+Helper function for incrementing bitset 
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em bit} & a S\+T\+L bitsize to be incremented \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a resulting S\+T\+L bitsize incremented 
+\end{DoxyReturn}
+\hypertarget{wu__prj1_8cpp_a0ddf1224851353fc92bfbff6f499fa97}{}\index{wu\+\_\+prj1.\+cpp@{wu\+\_\+prj1.\+cpp}!main@{main}}
+\index{main@{main}!wu\+\_\+prj1.\+cpp@{wu\+\_\+prj1.\+cpp}}
+\subsubsection[{main}]{\setlength{\rightskip}{0pt plus 5cm}int main (
+\begin{DoxyParamCaption}
+\item[{int}]{argc, }
+\item[{char $\ast$}]{argv\mbox{[}$\,$\mbox{]}}
+\end{DoxyParamCaption}
+)}\label{wu__prj1_8cpp_a0ddf1224851353fc92bfbff6f499fa97}
+
+
+Main function for executable. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em argc} & An integer representing argument count of command line arguments \\
+\hline
+{\em argv} & An argument vector of command line arguments \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+0 upon success or -\/1 with file reading errors 
+\end{DoxyReturn}
+\hypertarget{wu__prj1_8cpp_a96d85a1ade87d8554761164a5ed40e02}{}\index{wu\+\_\+prj1.\+cpp@{wu\+\_\+prj1.\+cpp}!tournament\+Predictor@{tournament\+Predictor}}
+\index{tournament\+Predictor@{tournament\+Predictor}!wu\+\_\+prj1.\+cpp@{wu\+\_\+prj1.\+cpp}}
+\subsubsection[{tournament\+Predictor}]{\setlength{\rightskip}{0pt plus 5cm}int tournament\+Predictor (
+\begin{DoxyParamCaption}
+\item[{vector$<$ bitset$<$ 2 $>$ $>$ \&}]{table, }
+\item[{int}]{bit\+Shift, }
+\item[{unsigned long long \&}]{my\+Line, }
+\item[{string \&}]{my\+Action, }
+\item[{int \&}]{count, }
+\item[{bool}]{T1, }
+\item[{bool}]{T2}
+\end{DoxyParamCaption}
+)}\label{wu__prj1_8cpp_a96d85a1ade87d8554761164a5ed40e02}
+Tournament Predictor, learns whether to predict via g\+Share or bimodal 
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in,out}  & {\em a} & vector table of bitsize of 2, storing the two bit states \\
+\hline
+\mbox{\tt in}  & {\em the} & table size represented by bit shifts, 2$^\wedge$bit\+Shift = table\+Size \\
+\hline
+\mbox{\tt in}  & {\em input} & address taken in, representing P\+C \\
+\hline
+\mbox{\tt in}  & {\em input} & action taken in, being either Taken or Not Taken \\
+\hline
+\mbox{\tt in,out}  & {\em current} & correct prediction counter \\
+\hline
+\mbox{\tt in}  & {\em boolean} & whether prediction 1, g\+Share, is true \\
+\hline
+\mbox{\tt in}  & {\em boolean} & whether prediction 2, bimodal, is true \\
+\hline
+\end{DoxyParams}
