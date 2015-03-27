@@ -1,10 +1,10 @@
-CFLAGS=-g -Wall -Wextra -Isrc -rdynamic -DNDEBUG
-CC=g++ -w
+CFLAGS=-g -w -Wall -Wextra -Isrc -rdynamic -DNDEBUG
+CC=g++
 
 SOURCES=wu_prj1.cpp
 
 all: 
-	$(CC) $(CFLAGS) $(SOURCES)
+	$(CC) $(SOURCES) -o predictors
 
 
 clean:

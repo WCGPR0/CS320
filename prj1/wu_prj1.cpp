@@ -65,7 +65,6 @@ int bimodalOne(vector<bitset<1> > &table, int bitShift, unsigned long long &myLi
 } 
 
 /// Bimodal  Predictor with a two bit of history
-/** \param tableSize integer that is the size of the Table */
 bool bimodalTwo(vector<bitset<2> > &table, int bitShift, unsigned long long &myLine, string &myAction, int &count) {
 	int index = (int) (0x1 << bitShift) - 1 & myLine;
 	bool flag = false;
@@ -111,7 +110,7 @@ bool gShare(vector<bitset<2> > &table, int bitShift, unsigned long long &myLine,
 
 	globalHistory <<= 1;
 	if (myAction == "T")
-	globalHistory |= 1;
+		globalHistory |= 1;
 	globalHistory &= (0x1 << historySize)-1;
 	return flag; 
 }
@@ -119,13 +118,13 @@ bool gShare(vector<bitset<2> > &table, int bitShift, unsigned long long &myLine,
 
 /// Tournament Predictor
 /** \param T1 boolean whether gShare is correct
-    \param T2 boolean whether bimodal is correct  */
+  \param T2 boolean whether bimodal is correct  */
 int tournamentPredictor(vector<bitset<2> > &table, int bitShift, unsigned long long &myLine, string &myAction, int &count, bool T1, bool T2) {
 	int index = (int) (0x1 << bitShift) - 1 & myLine;
 	if (T1 != T2) {
 		if (T1) { //gShare is correct
 			if (table[index] != GG) table[index] = decrement(table[index]);
-			}
+		}
 		else { //bimodal is correct
 			if (table[index] != BB) table[index] = increment(table[index]);
 		}
