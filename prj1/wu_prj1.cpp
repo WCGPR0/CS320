@@ -53,7 +53,6 @@ std::bitset<N> decrement (std::bitset<N> bit) {
 
 
 /// Bimodal  Predictor with a single bit of history
-/** \param tableSize integer that is the size of the Table */
 int bimodalOne(vector<bitset<1> > &table, int bitShift, unsigned long long &myLine, string &myAction, int &count) {
 	int index = (int) (0x1 << bitShift) - 1 & myLine;
 	//Compares Table Taken with Action Taken

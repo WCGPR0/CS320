@@ -2,13 +2,14 @@ CFLAGS=-g -w -Wall -Wextra -Isrc -rdynamic -DNDEBUG
 CC=g++
 
 SOURCES=wu_prj1.cpp
+OBJECTS=predictors
 
 all: 
-	$(CC) $(SOURCES) -o predictors
+	$(CC) $(SOURCES) -o $(OBJECTS)
 
 
 clean:
-	rm -rf build $(OBJECTS)
+	rm -rf build $(OBJECTS) vwu4.tar.gz
 	find . -name "*.gc" -exec rm {} \;
 	rm -rf `find . -name "*.dSYM" -print`
 
@@ -17,4 +18,4 @@ check:
 	@echo Files with potential bad functions
 	@egrep $(BADFUNCS) $(SOURCES) || true
 dist:
-	tar -czvf vwu4.tar.gz $(SOURCES) Makefile wu_prj1report.pdf
+	tar -czvf vwu4.tar.gz $(SOURCES) Makefile wu_prj1report.pdf README
