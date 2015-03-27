@@ -174,7 +174,7 @@ int main(int argc, char *argv[]) {
 				bool T1, T2;	
 				int arraySizes[] = {4, 5, 7, 8, 9, 10, 11};
 				for (int i = 0; i < SIZES; i ++) {	
-					//bimodalOne(bimodalOneTable[i], arraySizes[i],  myLine, myAction, bimodalOne_count[i]);
+					bimodalOne(bimodalOneTable[i], arraySizes[i],  myLine, myAction, bimodalOne_count[i]);
 					T2 = bimodalTwo(bimodalTwoTable[i], arraySizes[i],  myLine, myAction, bimodalTwo_count[i]);
 					gShare(gShareTable[i], arraySizes[SIZES-1], myLine, myAction, globalHistory[i], i+(gSIZES - SIZES + 1), global_count[i]);	
 				}
