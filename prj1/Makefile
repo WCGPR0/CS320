@@ -16,3 +16,5 @@ BADFUNCS='[^_.>a-zA-Z0-9](str(n?cpy|n?cat|xfrm|n?dup|str|pbrk|tok|_)|stpn?cpy|a?
 check:
 	@echo Files with potential bad functions
 	@egrep $(BADFUNCS) $(SOURCES) || true
+dist:
+	tar -czvf vwu4.tar.gz $(SOURCES) Makefile wu_prj1report.pdf
