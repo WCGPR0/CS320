@@ -1,33 +1,54 @@
 /** Victor Wu
   CS320 Project 2
  **/
-#define DIRECT_CACHE_LINE_SIZE 32
-
+#define CACHE_LINE_SIZE 32
+#define BYTES 1024
 
 #include <string.h>
 #include <sstream>
 #include <iostream>
 #include <fstream>
 #include <unordered_map>
+#include <array>
 #include <math.h>
 using namespace std;
+
+struct pCache{
+	long tag;
+	int sets;
+	pCache() : sets(2) {
+		array<int, sets> pArray;
+	}
+};
 
 
 typedef unordered_map<unsigned long, unsigned long> Cache;
 bool direct_mapped_cache(int kbSize, unsigned long long data, Cache& myCache) {
-	int offset_size = log (DIRECT_CACHE_LINE_SIZE) / log (2.);
-	int slot_size = log (1024 * kbSize / 32) / log (2.);
-	unsigned long slotBits = (data >> offset_size) & slot_size; 
+	int offset_size = log (CACHE_LINE_SIZE) / log (2.);
+	int slot_size = log (BYTES * kbSize / CACHE_LINE_SIZE) / log (2.);
+	unsigned long slotBits = (data >> offset_size) & ((0x1 << slot_size) - 1); 
 	unsigned long tagBits = data >> (offset_size + slot_size);
 	Cache::const_iterator got = myCache.find(slotBits);
-	if (got != myCache.end() && got->second == tagBits) return true;
+	if (got != myCache.end() && got->second == tagBits) 
+		return true;
 	else {  myCache[slotBits] = tagBits;
 	}
 	return false;
 }
 
-bool setAssociative_mapped_cache(int kbSize, int sets, unsigned long long data, Cache& myCache) {
+typedef unordered_map<struct pCache, unsigned long> Cache_p;
+bool setAssociative_mapped_cache(int kbSize, int sets, unsigned long long data, Cache_p& myCache) {
+	int offset_size = log (DIRECT_CACHE_LINE_SIZE) / log (2.);
+	int slot_size = log (BYTES * kbSize / DIRECT_CACHE_LINE_SIZE * sets) / log (2.);
+	unsigned long slotBits = (data >> offset_size) & ((0x1 << slot_size) - 1);
+	unsigned long tagBits = data >> (offset_size + slot_size);
+	Cache::const_iterator got = myCache.find(slotBits);
+	if (got != myCache.end() && got->second == tagBits)
+		return true;
+	else {
 
+	}
+	return false;	
 
 
 return true;
@@ -44,7 +65,8 @@ int main(int argc, char *argv[]) {
 		char loadStore = NULL;
 		int hitRates[6] = {0}, totalHits = 0;
 		Cache directCache_1, directCache_4,directCache_16, directCache_32;
-		Cache setCache_16;
+		Cache setCacheTwo_16, setCacheFour_16, setCacheEight_16, setCacheSixteen_16;
+		
 
 		//Main Loop, reading the file
 		if (myFile.is_open()) {
@@ -58,7 +80,10 @@ int main(int argc, char *argv[]) {
 				hitRates[3] += direct_mapped_cache(32, myLine, directCache_32);
 
 				//Set associative mapped cache
-				hitRates[4] += setAssociative_mapped_cache(16, 2, myLine, setCache_16);
+				hitRates[4] += setAssociative_mapped_cache(16, 2, myLine, setCacheTwo_16);
+				hitRates[5] += setAssociative_mapped_cache(16, 4, myLine, setCacheFour_16);
+				hitRates[6] += setAssociative_mapped_cache(16, 8, myLine, setCacheEight_16);
+				hitRates[7] += setAssociative_mapped_cache(16, 16, myLine, setCacheSixteen_16);
 				++totalHits;
 			}
 
