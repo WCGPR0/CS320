@@ -1,11 +1,11 @@
 CFLAGS=-g -w -Wall -Wextra -Isrc -rdynamic -DNDEBUG
-CC=g++
+CC=g++ -std=c++11
 
 SOURCES=wu_prj2.cpp
 OBJECTS=cache-sim
 
 all: 
-	$(CC) $(SOURCES) -o $(OBJECTS)
+	$(CC) $(SOURCES) $(CFLAGS) -o $(OBJECTS)
 
 
 clean:
