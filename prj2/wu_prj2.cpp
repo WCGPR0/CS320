@@ -9,16 +9,15 @@
 #include <iostream>
 #include <fstream>
 #include <unordered_map>
-#include <array>
+
 #include <math.h>
 using namespace std;
 
 struct pCache{
 	long tag;
 	int sets;
-	pCache() : sets(2) {
-		array<int, sets> pArray;
-	}
+	
+}
 };
 
 
@@ -65,7 +64,7 @@ int main(int argc, char *argv[]) {
 		char loadStore = NULL;
 		int hitRates[6] = {0}, totalHits = 0;
 		Cache directCache_1, directCache_4,directCache_16, directCache_32;
-		Cache setCacheTwo_16, setCacheFour_16, setCacheEight_16, setCacheSixteen_16;
+		pCache setCacheTwo_16, setCacheFour_16, setCacheEight_16, setCacheSixteen_16;
 		
 
 		//Main Loop, reading the file
