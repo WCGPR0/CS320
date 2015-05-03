@@ -9,17 +9,9 @@
 #include <iostream>
 #include <fstream>
 #include <unordered_map>
-
+#include <list>
 #include <math.h>
 using namespace std;
-
-struct pCache{
-	long tag;
-	int sets;
-	
-}
-};
-
 
 typedef unordered_map<unsigned long, unsigned long> Cache;
 bool direct_mapped_cache(int kbSize, unsigned long long data, Cache& myCache) {
@@ -35,22 +27,25 @@ bool direct_mapped_cache(int kbSize, unsigned long long data, Cache& myCache) {
 	return false;
 }
 
-typedef unordered_map<struct pCache, unsigned long> Cache_p;
+typedef unordered_map<unsigned long, list<unsigned long> > Cache_p;
 bool setAssociative_mapped_cache(int kbSize, int sets, unsigned long long data, Cache_p& myCache) {
-	int offset_size = log (DIRECT_CACHE_LINE_SIZE) / log (2.);
-	int slot_size = log (BYTES * kbSize / DIRECT_CACHE_LINE_SIZE * sets) / log (2.);
+	int offset_size = log (CACHE_LINE_SIZE) / log (2.);
+	int slot_size = log (BYTES * kbSize / CACHE_LINE_SIZE * sets) / log (2.);
 	unsigned long slotBits = (data >> offset_size) & ((0x1 << slot_size) - 1);
 	unsigned long tagBits = data >> (offset_size + slot_size);
-	Cache::const_iterator got = myCache.find(slotBits);
-	if (got != myCache.end() && got->second == tagBits)
-		return true;
-	else {
-
+	Cache_p::iterator got = myCache.find(slotBits);
+	if (got != myCache.end()) {
+		for (list<unsigned long>::iterator it = got->second.begin(); it != got->second.end(); ++it)
+		if (*it == tagBits) {
+			got->second.remove(tagBits);
+			got->second.push_back(tagBits);
+			return true;
+		}
 	}
+	if (got->second.size() >= sets) 
+			got->second.pop_front();
+		got->second.push_back(tagBits);
 	return false;	
-
-
-return true;
 }
 
 int main(int argc, char *argv[]) {
@@ -64,7 +59,7 @@ int main(int argc, char *argv[]) {
 		char loadStore = NULL;
 		int hitRates[6] = {0}, totalHits = 0;
 		Cache directCache_1, directCache_4,directCache_16, directCache_32;
-		pCache setCacheTwo_16, setCacheFour_16, setCacheEight_16, setCacheSixteen_16;
+		Cache_p setCacheTwo_16, setCacheFour_16, setCacheEight_16, setCacheSixteen_16;
 		
 
 		//Main Loop, reading the file
