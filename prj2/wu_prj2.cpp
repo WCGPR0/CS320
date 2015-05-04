@@ -42,36 +42,41 @@ bool setAssociative_mapped_cache(int kbSize, int sets, unsigned long long data, 
 				return true;
 			}
 	}
-
-	if (myCache[slotBits].size() >= sets) 
-		myCache[slotBits].pop_front();
+	else if (load){
+		if (myCache[slotBits].size() >= sets)
+			myCache[slotBits].pop_front();
 	myCache[slotBits].push_back(tagBits);
+	}
 	return false;	
 }
 
 
-bool fullAssociative_mapped_cache(int kbSize, int sets, unsigned long long data, list<unsigned long> myCache, bool rand_opt) {		
+bool fullAssociative_mapped_cache(int kbSize, unsigned long long data, list<unsigned long>& myCache, bool rand_opt) {		
 	int offset_size = log (CACHE_LINE_SIZE) / log (2.);
+	int size = BYTES * kbSize / CACHE_LINE_SIZE;
 	unsigned long tagBits = data >> (offset_size);
 	list<unsigned long>::iterator it;
-	for (it = myCache.begin(); it != myCache.end(); ++it)
+	for (it = myCache.begin(); it != myCache.end(); ++it) {
 		if (*it == tagBits) {
 			myCache.remove(tagBits);
 			myCache.push_back(tagBits);
 			return true;
 		}
-
+	}
 	if (!rand_opt) {
-		if (myCache.size() >= sets)
-			myCache.pop_front();
-		myCache.push_back(tagBits);
+		if (myCache.size() >= size)
+			myCache.pop_front();	
 	}
 	else {
-		it = myCache.begin();
-		for (int i = 0; i < rand() % sets; ++i)
-			++it;
-		myCache.insert(it, *it+1, tagBits);
+		if (myCache.size() >= size) {
+			it = myCache.begin();
+			for (int i = 0; i < rand() % size; ++i)
+				++it;
+			myCache.erase(it);
+		}	
 	}
+	myCache.push_back(tagBits);
+	
 	return false;
 }
 
@@ -84,22 +89,23 @@ int main(int argc, char *argv[]) {
 		unsigned long long myLine = 0;
 		string line;
 		char loadStore = NULL;
-		int hitRates[6] = {0}, totalHits = 0;
+		int hitRates[22] = {0}, totalHits = 0;
 		Cache directCache_1, directCache_4,directCache_16, directCache_32;
 		Cache_p setCacheTwo_16, setCacheFour_16, setCacheEight_16, setCacheSixteen_16;
 		list<unsigned long> fullCache, fullCache_rand;	
 		Cache_p setCacheTwo_16_S, setCacheFour_16_S, setCacheEight_16_S, setCacheSixteen_16_S;
-
+		Cache_p setCacheTwo_16_P, setCacheFour_16_P, setCacheEight_16_P, setCacheSixteen_16_P;
+		Cache_p setCacheTwo_16_P_m, setCacheFour_16_P_m, setCacheEight_16_P_m, setCacheSixteen_16_P_m;
 		//Main Loop, reading the file
 		if (myFile.is_open()) {
 			while (getline(myFile,line)) {
 				istringstream iss(line);
 				iss >> loadStore >> hex >> myLine;	
 				//Direct mapped cache
-				hitRates[0] += direct_mapped_cache(1, myLine, directCache_1);
-				hitRates[1] += direct_mapped_cache(4, myLine, directCache_4);
-				hitRates[2] += direct_mapped_cache(16, myLine, directCache_16);
-				hitRates[3] += direct_mapped_cache(32, myLine, directCache_32);
+//				hitRates[0] += direct_mapped_cache(1, myLine, directCache_1);
+//				hitRates[1] += direct_mapped_cache(4, myLine, directCache_4);
+//				hitRates[2] += direct_mapped_cache(16, myLine, directCache_16);
+//				hitRates[3] += direct_mapped_cache(32, myLine, directCache_32);
 
 				//Set associative mapped cache
 				hitRates[4] += setAssociative_mapped_cache(16, 2, myLine, setCacheTwo_16, true);
@@ -108,15 +114,26 @@ int main(int argc, char *argv[]) {
 				hitRates[7] += setAssociative_mapped_cache(16, 16, myLine, setCacheSixteen_16, true);
 
 				//Fully associative mapped cache
-				hitRates[8] += fullAssociative_mapped_cache(16, 2, myLine, fullCache, false);
-				hitRates[9] += fullAssociative_mapped_cache(16, 2, myLine, fullCache_rand, true);
+				hitRates[8] += fullAssociative_mapped_cache(16, myLine, fullCache, false);
+				hitRates[9] += fullAssociative_mapped_cache(16, myLine, fullCache_rand, true);
 
 				//Set associative mapped cache with no allocation on a write miss
-				hitRates[10] += setAssociative_mapped_cache(16, 2, myLine, setCacheTwo_16_S, loadStore);
-				hitRates[11] += setAssociative_mapped_cache(16, 4, myLine, setCacheFour_16_S, loadStore);
-				hitRates[12] += setAssociative_mapped_cache(16, 8, myLine, setCacheEight_16_S, loadStore);
-				hitRates[13] += setAssociative_mapped_cache(16, 16, myLine, setCacheSixteen_16_S, loadStore);
+				hitRates[10] += setAssociative_mapped_cache(16, 2, myLine, setCacheTwo_16_S, loadStore == 'L' ? 1 : 0);
+				hitRates[11] += setAssociative_mapped_cache(16, 4, myLine, setCacheFour_16_S, loadStore == 'L' ? 1 : 0);
+				hitRates[12] += setAssociative_mapped_cache(16, 8, myLine, setCacheEight_16_S, loadStore == 'L' ? 1 : 0);
+				hitRates[13] += setAssociative_mapped_cache(16, 16, myLine, setCacheSixteen_16_S, loadStore == 'L' ? 1 :0);
 
+				//Set associative mappd cache with pre-fetching
+				hitRates[14] += setAssociative_mapped_cache(16, 2, myLine, setCacheTwo_16_P, true);
+				hitRates[15] += setAssociative_mapped_cache(16, 2, myLine, setCacheFour_16_P, true);
+				hitRates[16] += setAssociative_mapped_cache(16, 2, myLine, setCacheEight_16_P, true);
+				hitRates[17] += setAssociative_mapped_cache(16, 2, myLine, setCacheSixteen_16_P, true);
+
+				//Set associative mapped cache with pre-fetching on miss only
+				hitRates[18] += setAssociative_mapped_cache(16, 2, myLine, setCacheTwo_16_P_m, true);
+				hitRates[19] += setAssociative_mapped_cache(16, 2, myLine, setCacheTwo_16_P_m, true);
+				hitRates[20] += setAssociative_mapped_cache(16, 2, myLine, setCacheTwo_16_P_m, true);
+				hitRates[21] += setAssociative_mapped_cache(16, 2, myLine, setCacheTwo_16_P_m, true);
 				++totalHits;
 			}
 
@@ -128,10 +145,16 @@ int main(int argc, char *argv[]) {
 			for (; i < 8; ++i)
 				cout << hitRates[i] << ',' << totalHits << "; ";
 			cout << endl;
-			cout << hitRates[++i] << endl << hitRates[++i] << endl;
-			//			for (; i < 14; ++i)
-			//				cout << hitRates[i] << ',' << totalHits << "; ";
-			//			cout << endl;
+			cout << hitRates[i++] << endl << hitRates[i++] << endl;
+			for (; i < 14; ++i)
+				cout << hitRates[i] << ',' << totalHits << "; ";
+			cout << endl;
+			for (; i < 18; ++i)
+				cout << hitRates[i] << ',' << totalHits << "; ";
+			cout << endl;
+			for (; i < 22; ++i)
+				cout << hitRates[i] << ',' << totalHits << "; ";
+			cout << endl;
 			myFile.close();
 		}
 		else {
