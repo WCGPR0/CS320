@@ -28,24 +28,32 @@ bool direct_mapped_cache(int kbSize, unsigned long long data, Cache& myCache) {
 }
 
 typedef unordered_map<unsigned long, list<unsigned long> > Cache_p;
-bool setAssociative_mapped_cache(int kbSize, int sets, unsigned long long data, Cache_p& myCache, bool load) {
+bool setAssociative_mapped_cache(int kbSize, int sets, unsigned long long data, Cache_p& myCache, bool load = true, int option = 0) {
 	int offset_size = log (CACHE_LINE_SIZE) / log (2.);
-	int slot_size = log (BYTES * kbSize / CACHE_LINE_SIZE * sets) / log (2.);
+	int slot_size = log (BYTES * kbSize / CACHE_LINE_SIZE * sets) / log (2.);	
 	unsigned long slotBits = (data >> offset_size) & ((0x1 << slot_size) - 1);
 	unsigned long tagBits = data >> (offset_size + slot_size);
 	Cache_p::iterator got = myCache.find(slotBits);
 	if (got != myCache.end()) {
-		for (list<unsigned long>::iterator it = got->second.begin(); it != got->second.end(); ++it)
+		for (list<unsigned long>::iterator it = got->second.begin(); it != got->second.end(); ++it) {
 			if (*it == tagBits) {
-				myCache[slotBits].remove(tagBits);
-				myCache[slotBits].push_back(tagBits);
+				got->second.remove(tagBits);
+				got->second.push_back(tagBits);
 				return true;
 			}
+cout << slotBits << ":\t" << *it << endl;
+		}
 	}
 	else if (load){
 		if (myCache[slotBits].size() >= sets)
 			myCache[slotBits].pop_front();
-	myCache[slotBits].push_back(tagBits);
+		myCache[slotBits].push_back(tagBits);
+	}
+	if (option) {
+		if (myCache[slotBits+1].size() >= sets)
+			myCache[slotBits+1].pop_front();
+		
+		myCache[slotBits+1].push_back(tagBits);
 	}
 	return false;	
 }
@@ -75,8 +83,7 @@ bool fullAssociative_mapped_cache(int kbSize, unsigned long long data, list<unsi
 			myCache.erase(it);
 		}	
 	}
-	myCache.push_back(tagBits);
-	
+	myCache.push_back(tagBits);	
 	return false;
 }
 
@@ -96,6 +103,7 @@ int main(int argc, char *argv[]) {
 		Cache_p setCacheTwo_16_S, setCacheFour_16_S, setCacheEight_16_S, setCacheSixteen_16_S;
 		Cache_p setCacheTwo_16_P, setCacheFour_16_P, setCacheEight_16_P, setCacheSixteen_16_P;
 		Cache_p setCacheTwo_16_P_m, setCacheFour_16_P_m, setCacheEight_16_P_m, setCacheSixteen_16_P_m;
+		
 		//Main Loop, reading the file
 		if (myFile.is_open()) {
 			while (getline(myFile,line)) {
@@ -114,26 +122,26 @@ int main(int argc, char *argv[]) {
 				hitRates[7] += setAssociative_mapped_cache(16, 16, myLine, setCacheSixteen_16, true);
 
 				//Fully associative mapped cache
-				hitRates[8] += fullAssociative_mapped_cache(16, myLine, fullCache, false);
-				hitRates[9] += fullAssociative_mapped_cache(16, myLine, fullCache_rand, true);
+//				hitRates[8] += fullAssociative_mapped_cache(16, myLine, fullCache, false);
+//				hitRates[9] += fullAssociative_mapped_cache(16, myLine, fullCache_rand, true);
 
 				//Set associative mapped cache with no allocation on a write miss
-				hitRates[10] += setAssociative_mapped_cache(16, 2, myLine, setCacheTwo_16_S, loadStore == 'L' ? 1 : 0);
-				hitRates[11] += setAssociative_mapped_cache(16, 4, myLine, setCacheFour_16_S, loadStore == 'L' ? 1 : 0);
-				hitRates[12] += setAssociative_mapped_cache(16, 8, myLine, setCacheEight_16_S, loadStore == 'L' ? 1 : 0);
-				hitRates[13] += setAssociative_mapped_cache(16, 16, myLine, setCacheSixteen_16_S, loadStore == 'L' ? 1 :0);
+//				hitRates[10] += setAssociative_mapped_cache(16, 2, myLine, setCacheTwo_16_S, loadStore == 'L' ? 1 : 0);
+//				hitRates[11] += setAssociative_mapped_cache(16, 4, myLine, setCacheFour_16_S, loadStore == 'L' ? 1 : 0);
+//				hitRates[12] += setAssociative_mapped_cache(16, 8, myLine, setCacheEight_16_S, loadStore == 'L' ? 1 : 0);
+//				hitRates[13] += setAssociative_mapped_cache(16, 16, myLine, setCacheSixteen_16_S, loadStore == 'L' ? 1 :0);
 
 				//Set associative mappd cache with pre-fetching
-				hitRates[14] += setAssociative_mapped_cache(16, 2, myLine, setCacheTwo_16_P, true);
-				hitRates[15] += setAssociative_mapped_cache(16, 2, myLine, setCacheFour_16_P, true);
-				hitRates[16] += setAssociative_mapped_cache(16, 2, myLine, setCacheEight_16_P, true);
-				hitRates[17] += setAssociative_mapped_cache(16, 2, myLine, setCacheSixteen_16_P, true);
+//				hitRates[14] += setAssociative_mapped_cache(16, 2, myLine, setCacheTwo_16_P, true, 1);
+//				hitRates[15] += setAssociative_mapped_cache(16, 2, myLine, setCacheFour_16_P, true, 1);
+//				hitRates[16] += setAssociative_mapped_cache(16, 2, myLine, setCacheEight_16_P, true, 1);
+//				hitRates[17] += setAssociative_mapped_cache(16, 2, myLine, setCacheSixteen_16_P, true, 1);
 
 				//Set associative mapped cache with pre-fetching on miss only
-				hitRates[18] += setAssociative_mapped_cache(16, 2, myLine, setCacheTwo_16_P_m, true);
-				hitRates[19] += setAssociative_mapped_cache(16, 2, myLine, setCacheTwo_16_P_m, true);
-				hitRates[20] += setAssociative_mapped_cache(16, 2, myLine, setCacheTwo_16_P_m, true);
-				hitRates[21] += setAssociative_mapped_cache(16, 2, myLine, setCacheTwo_16_P_m, true);
+//				hitRates[18] += setAssociative_mapped_cache(16, 2, myLine, setCacheTwo_16_P_m, true), 2;
+//				hitRates[19] += setAssociative_mapped_cache(16, 2, myLine, setCacheTwo_16_P_m, true, 2);
+//				hitRates[20] += setAssociative_mapped_cache(16, 2, myLine, setCacheTwo_16_P_m, true, 2);
+//				hitRates[21] += setAssociative_mapped_cache(16, 2, myLine, setCacheTwo_16_P_m, true, 2);
 				++totalHits;
 			}
 
