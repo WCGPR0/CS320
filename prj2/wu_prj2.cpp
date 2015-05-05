@@ -1,8 +1,11 @@
-/** Victor Wu
-  CS320 Project 2
+// $Id$
+/**
+  @author  Victor Wu
+  @brief CS320 Project 2
+  @file wu_prj2.cpp
+  Implementation of cache prediction methods including direct-mapped-caches, set-associative-caches, and fully-associative caches
  **/
-#define CACHE_LINE_SIZE 32
-#define BYTES 1024
+// $Log$
 
 #include <string.h>
 #include <sstream>
@@ -13,20 +16,41 @@
 #include <math.h>
 using namespace std;
 
+/** Size of Cache Lines are 32 bytes each */
+#define CACHE_LINE_SIZE 32
+/** The conversion of one kB to bytes are by 1024 */
+#define BYTES 1024
+
+/* A cache with ulong as key and data */
 typedef unordered_map<unsigned long, unsigned long> Cache;
+/** The direct mapped cache simulation.
+	@param[in] an int that represents the size in kB
+	@param[in] the address to be simulated
+	@param[in,out] the Cache we are working on
+*/
 bool direct_mapped_cache(int kbSize, unsigned long long data, Cache& myCache) {
-	int offset_size = log (CACHE_LINE_SIZE) / log (2.);
-	int slot_size = log (BYTES * kbSize / CACHE_LINE_SIZE) / log (2.);
-	unsigned long slotBits = (data >> offset_size) & ((0x1 << slot_size) - 1); 
-	unsigned long tagBits = data >> (offset_size + slot_size);
+	int offset_size = log (CACHE_LINE_SIZE) / log (2.); /*!< Amount of bits in the offset bits, typically in a 32-byte cache line, it is 5 */
+	int slot_size = log (BYTES * kbSize / CACHE_LINE_SIZE) / log (2.); /*!< Amount of bits in the slot bits */
+	unsigned long slotBits = (data >> offset_size) & ((0x1 << slot_size) - 1); /*!< The masked bits of the slot bits */
+	unsigned long tagBits = data >> (offset_size + slot_size); /*!< The masked bits of the tag bits */
 	Cache::const_iterator got = myCache.find(slotBits);
-	if (got != myCache.end() && got->second == tagBits) 
+	// if map contains exisiting slot and matches tag bits
+	if (got != myCache.end() && got->second == tagBits)  
 		return true;
+	// else create it or overrides
 	else {  myCache[slotBits] = tagBits;
 	}
 	return false;
 }
 
+/** The set-associative mapped cache simulation.
+	@param[in] an int that represents the size in kB
+	@param[in] an int that represents the amount of sets
+	@param[in] the address to be simulated
+	@param[in,out] the Cache we are working on
+	@param[in] if the address is a load or store instruction, true being load and false being store
+	@param[in] additional options, >0 for running prefetch, and 2 for prefetch only on miss
+*/
 typedef unordered_map<unsigned long, list<unsigned long> > Cache_p;
 bool setAssociative_mapped_cache(int kbSize, int sets, unsigned long long data, Cache_p& myCache, bool load = true, int option = 0) {
 	int offset_size = log (CACHE_LINE_SIZE) / log (2.);
@@ -57,7 +81,12 @@ bool setAssociative_mapped_cache(int kbSize, int sets, unsigned long long data, 
 	return false;	
 }
 
-
+/** The fully-associative mapped cache simulation.
+	@param[in] an int that presents the size in kB
+	@param[in] the address to be simulated
+	@param[in,out] the Cache we are working on
+	@param[in] if we are using LRU or random scheme
+*/
 bool fullAssociative_mapped_cache(int kbSize, unsigned long long data, list<unsigned long>& myCache, bool rand_opt) {		
 	int offset_size = log (CACHE_LINE_SIZE) / log (2.);
 	int size = BYTES * kbSize / CACHE_LINE_SIZE;
@@ -86,8 +115,12 @@ bool fullAssociative_mapped_cache(int kbSize, unsigned long long data, list<unsi
 	return false;
 }
 
+/// \brief Main function for executable
+/// \param argc An integer representing argument count of command line arguments
+/// \param argv An argument vector of command line arguments
+/// \return 0 upon success or -1 with file reading errors
 int main(int argc, char *argv[]) {
-	if (argc == 2 && (!strcmp(argv[1], "--help") || !strcmp(argv[1], "-h"))) cout << "Usage: wu_prj1 [INPUT] [OUTPUT]" << endl;
+	if (argc == 2 && (!strcmp(argv[1], "--help") || !strcmp(argv[1], "-h"))) cout << "Usage: wu_prj2 [INPUT] [OUTPUT]" << endl;
 	else if (argc != 3) cout << "Invalid arguments. Use command --help for more information" << endl;
 	else {
 		//Declarations
@@ -95,6 +128,7 @@ int main(int argc, char *argv[]) {
 		ofstream myFile_out(argv[2]);
 		unsigned long long myLine = 0;
 		string line;
+		// \brief load or store flag
 		char loadStore = NULL;
 		int hitRates[22] = {0}, totalHits = 0;
 		Cache directCache_1, directCache_4,directCache_16, directCache_32;
