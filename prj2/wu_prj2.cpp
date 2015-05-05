@@ -41,7 +41,6 @@ bool setAssociative_mapped_cache(int kbSize, int sets, unsigned long long data, 
 				got->second.push_back(tagBits);
 				return true;
 			}
-cout << slotBits << ":\t" << *it << endl;
 		}
 	}
 	else if (load){
@@ -52,7 +51,7 @@ cout << slotBits << ":\t" << *it << endl;
 	if (option) {
 		if (myCache[slotBits+1].size() >= sets)
 			myCache[slotBits+1].pop_front();
-		
+
 		myCache[slotBits+1].push_back(tagBits);
 	}
 	return false;	
@@ -93,6 +92,7 @@ int main(int argc, char *argv[]) {
 	else {
 		//Declarations
 		ifstream myFile(argv[1]);
+		ofstream myFile_out(argv[2]);
 		unsigned long long myLine = 0;
 		string line;
 		char loadStore = NULL;
@@ -103,17 +103,17 @@ int main(int argc, char *argv[]) {
 		Cache_p setCacheTwo_16_S, setCacheFour_16_S, setCacheEight_16_S, setCacheSixteen_16_S;
 		Cache_p setCacheTwo_16_P, setCacheFour_16_P, setCacheEight_16_P, setCacheSixteen_16_P;
 		Cache_p setCacheTwo_16_P_m, setCacheFour_16_P_m, setCacheEight_16_P_m, setCacheSixteen_16_P_m;
-		
+
 		//Main Loop, reading the file
 		if (myFile.is_open()) {
 			while (getline(myFile,line)) {
 				istringstream iss(line);
 				iss >> loadStore >> hex >> myLine;	
 				//Direct mapped cache
-//				hitRates[0] += direct_mapped_cache(1, myLine, directCache_1);
-//				hitRates[1] += direct_mapped_cache(4, myLine, directCache_4);
-//				hitRates[2] += direct_mapped_cache(16, myLine, directCache_16);
-//				hitRates[3] += direct_mapped_cache(32, myLine, directCache_32);
+				hitRates[0] += direct_mapped_cache(1, myLine, directCache_1);
+				hitRates[1] += direct_mapped_cache(4, myLine, directCache_4);
+				hitRates[2] += direct_mapped_cache(16, myLine, directCache_16);
+				hitRates[3] += direct_mapped_cache(32, myLine, directCache_32);
 
 				//Set associative mapped cache
 				hitRates[4] += setAssociative_mapped_cache(16, 2, myLine, setCacheTwo_16, true);
@@ -122,48 +122,49 @@ int main(int argc, char *argv[]) {
 				hitRates[7] += setAssociative_mapped_cache(16, 16, myLine, setCacheSixteen_16, true);
 
 				//Fully associative mapped cache
-//				hitRates[8] += fullAssociative_mapped_cache(16, myLine, fullCache, false);
-//				hitRates[9] += fullAssociative_mapped_cache(16, myLine, fullCache_rand, true);
+				hitRates[8] += fullAssociative_mapped_cache(16, myLine, fullCache, false);
+				hitRates[9] += fullAssociative_mapped_cache(16, myLine, fullCache_rand, true);
 
 				//Set associative mapped cache with no allocation on a write miss
-//				hitRates[10] += setAssociative_mapped_cache(16, 2, myLine, setCacheTwo_16_S, loadStore == 'L' ? 1 : 0);
-//				hitRates[11] += setAssociative_mapped_cache(16, 4, myLine, setCacheFour_16_S, loadStore == 'L' ? 1 : 0);
-//				hitRates[12] += setAssociative_mapped_cache(16, 8, myLine, setCacheEight_16_S, loadStore == 'L' ? 1 : 0);
-//				hitRates[13] += setAssociative_mapped_cache(16, 16, myLine, setCacheSixteen_16_S, loadStore == 'L' ? 1 :0);
+				hitRates[10] += setAssociative_mapped_cache(16, 2, myLine, setCacheTwo_16_S, loadStore == 'L' ? 1 : 0);
+				hitRates[11] += setAssociative_mapped_cache(16, 4, myLine, setCacheFour_16_S, loadStore == 'L' ? 1 : 0);
+				hitRates[12] += setAssociative_mapped_cache(16, 8, myLine, setCacheEight_16_S, loadStore == 'L' ? 1 : 0);
+				hitRates[13] += setAssociative_mapped_cache(16, 16, myLine, setCacheSixteen_16_S, loadStore == 'L' ? 1 :0);
 
 				//Set associative mappd cache with pre-fetching
-//				hitRates[14] += setAssociative_mapped_cache(16, 2, myLine, setCacheTwo_16_P, true, 1);
-//				hitRates[15] += setAssociative_mapped_cache(16, 2, myLine, setCacheFour_16_P, true, 1);
-//				hitRates[16] += setAssociative_mapped_cache(16, 2, myLine, setCacheEight_16_P, true, 1);
-//				hitRates[17] += setAssociative_mapped_cache(16, 2, myLine, setCacheSixteen_16_P, true, 1);
+				hitRates[14] += setAssociative_mapped_cache(16, 2, myLine, setCacheTwo_16_P, true, 1);
+				hitRates[15] += setAssociative_mapped_cache(16, 2, myLine, setCacheFour_16_P, true, 1);
+				hitRates[16] += setAssociative_mapped_cache(16, 2, myLine, setCacheEight_16_P, true, 1);
+				hitRates[17] += setAssociative_mapped_cache(16, 2, myLine, setCacheSixteen_16_P, true, 1);
 
 				//Set associative mapped cache with pre-fetching on miss only
-//				hitRates[18] += setAssociative_mapped_cache(16, 2, myLine, setCacheTwo_16_P_m, true), 2;
-//				hitRates[19] += setAssociative_mapped_cache(16, 2, myLine, setCacheTwo_16_P_m, true, 2);
-//				hitRates[20] += setAssociative_mapped_cache(16, 2, myLine, setCacheTwo_16_P_m, true, 2);
-//				hitRates[21] += setAssociative_mapped_cache(16, 2, myLine, setCacheTwo_16_P_m, true, 2);
+				hitRates[18] += setAssociative_mapped_cache(16, 2, myLine, setCacheTwo_16_P_m, true), 2;
+				hitRates[19] += setAssociative_mapped_cache(16, 2, myLine, setCacheTwo_16_P_m, true, 2);
+				hitRates[20] += setAssociative_mapped_cache(16, 2, myLine, setCacheTwo_16_P_m, true, 2);
+				hitRates[21] += setAssociative_mapped_cache(16, 2, myLine, setCacheTwo_16_P_m, true, 2);
 				++totalHits;
 			}
 
+			myFile.close();
 			//Output
 			int i = 0;
 			for (; i < 4; ++i)
-				cout << hitRates[i] << ',' << totalHits << "; ";
-			cout << endl;
+				myFile_out << hitRates[i] << ',' << totalHits << "; ";
+			myFile_out << endl;
 			for (; i < 8; ++i)
-				cout << hitRates[i] << ',' << totalHits << "; ";
-			cout << endl;
-			cout << hitRates[i++] << endl << hitRates[i++] << endl;
+				myFile_out << hitRates[i] << ',' << totalHits << "; ";
+			myFile_out << endl;
+			myFile_out << hitRates[i++] << endl << hitRates[i++] << endl;
 			for (; i < 14; ++i)
-				cout << hitRates[i] << ',' << totalHits << "; ";
-			cout << endl;
+				myFile_out << hitRates[i] << ',' << totalHits << "; ";
+			myFile_out << endl;
 			for (; i < 18; ++i)
-				cout << hitRates[i] << ',' << totalHits << "; ";
-			cout << endl;
+				myFile_out << hitRates[i] << ',' << totalHits << "; ";
+			myFile_out << endl;
 			for (; i < 22; ++i)
-				cout << hitRates[i] << ',' << totalHits << "; ";
-			cout << endl;
-			myFile.close();
+				myFile_out << hitRates[i] << ',' << totalHits << "; ";
+			myFile_out << endl;
+			myFile_out.close();
 		}
 		else {
 			cerr << "Unable to open input file" << endl;

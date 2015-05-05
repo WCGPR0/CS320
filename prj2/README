@@ -1,0 +1,9 @@
+Name: Victor Wu
+BU-ID: vwu4
+B-number: B00403882
+
+I believe my implementation of this project is slightly unique, in which I used a map or list STL container.
+There are a few errors, where the generated output do not always match the correct output.
+
+Going over the code, and through extensive debugging, the logic seems correct and I couldn't locate the logic errors.
+Instead of cold-hot bits, I wasn't paying attention and made the mistake of implementing the random scheme for address replacement.
