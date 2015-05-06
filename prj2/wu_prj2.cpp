@@ -21,6 +21,7 @@ using namespace std;
 /** The conversion of one kB to bytes are by 1024 */
 #define BYTES 1024
 
+
 /* A cache with ulong as key and data */
 typedef unordered_map<unsigned long, unsigned long> Cache;
 /** The direct mapped cache simulation.
@@ -54,7 +55,7 @@ bool direct_mapped_cache(int kbSize, unsigned long long data, Cache& myCache) {
 typedef unordered_map<unsigned long, list<unsigned long> > Cache_p;
 bool setAssociative_mapped_cache(int kbSize, int sets, unsigned long long data, Cache_p& myCache, bool load = true, int option = 0) {
 	int offset_size = log (CACHE_LINE_SIZE) / log (2.);
-	int slot_size = log (BYTES * kbSize / CACHE_LINE_SIZE * sets) / log (2.);	
+	int slot_size = log ((BYTES * kbSize) / (CACHE_LINE_SIZE * sets)) / log (2.);
 	unsigned long slotBits = (data >> offset_size) & ((0x1 << slot_size) - 1);
 	unsigned long tagBits = data >> (offset_size + slot_size);
 	Cache_p::iterator got = myCache.find(slotBits);
@@ -63,21 +64,19 @@ bool setAssociative_mapped_cache(int kbSize, int sets, unsigned long long data, 
 			if (*it == tagBits) {
 				got->second.remove(tagBits);
 				got->second.push_back(tagBits);
+				if (option == 1) setAssociative_mapped_cache(kbSize, sets, data+CACHE_LINE_SIZE, myCache, load);
 				return true;
 			}
 		}
 	}
-	else if (load){
-		if (myCache[slotBits].size() >= sets)
-			myCache[slotBits].pop_front();
+	if (load){
 		myCache[slotBits].push_back(tagBits);
+		if (myCache[slotBits].size() > sets){
+			myCache[slotBits].pop_front();
+	}	
 	}
-	if (option) {
-		if (myCache[slotBits+1].size() >= sets)
-			myCache[slotBits+1].pop_front();
-
-		myCache[slotBits+1].push_back(tagBits);
-	}
+	if (option)
+		return setAssociative_mapped_cache(kbSize, sets, data+CACHE_LINE_SIZE, myCache, load);
 	return false;	
 }
 
@@ -99,21 +98,35 @@ bool fullAssociative_mapped_cache(int kbSize, unsigned long long data, list<unsi
 			return true;
 		}
 	}
-	if (!rand_opt) {
+//	if (!rand_opt) {
 		if (myCache.size() >= size)
 			myCache.pop_front();	
-	}
-	else {
-		if (myCache.size() >= size) {
-			it = myCache.begin();
-			for (int i = 0; i < rand() % size; ++i)
-				++it;
-			myCache.erase(it);
-		}	
-	}
+//	}
+//	else {
+//		if (myCache.size() >= size) {
+//			it = myCache.begin();
+//			for (int i = 0; i < rand() % size; ++i)
+//				++it;
+//			myCache.erase(it);
+//		}	
+//	}
 	myCache.push_back(tagBits);	
 	return false;
 }
+
+
+void TESTPRINT(Cache_p& myCache) {
+cout << "CACHES:\t";
+for (Cache_p::iterator it=myCache.begin(); it!=myCache.end(); ++it) {
+    cout << it->first << " => ";	
+	for (list <unsigned long>::iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2)
+		cout << *it2 << ',';
+	cout <<endl;
+}
+return;
+}
+
+
 
 /// \brief Main function for executable
 /// \param argc An integer representing argument count of command line arguments
